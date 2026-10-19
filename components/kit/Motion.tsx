@@ -53,7 +53,7 @@ export default function Motion() {
           gsap.from(s.lines, { yPercent: 112, rotate: 2, duration: 1.2, ease: "expo.out", stagger: 0.08, scrollTrigger: { trigger: el, start: "top 88%", once: true } });
         });
         q('[data-reveal="chars"]').forEach((el) => {
-          const s = new SplitText(el, { type: "chars", mask: "chars" }); splits.push(s);
+          const s = new SplitText(el, { type: "words,chars", mask: "chars" }); splits.push(s);
           gsap.set(el, { autoAlpha: 1 });
           gsap.from(s.chars, { yPercent: 110, duration: 1.05, ease: "expo.out", stagger: { each: 0.03, from: el.dataset.from === "center" ? "center" : "start" }, scrollTrigger: { trigger: el, start: "top 90%", once: true } });
         });
