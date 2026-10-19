@@ -82,7 +82,13 @@ export default function Motion() {
       ScrollTrigger.refresh();
     };
     document.fonts.ready.then(run);
+    // safety net: any late layout change (fonts, images, tab content) re-measures every trigger/pin,
+    // so pinned sections never start at a stale offset (the cause of "jumping" sections)
+    let lastH = document.documentElement.scrollHeight, rz = 0;
+    const ro = new ResizeObserver(() => { const h = document.documentElement.scrollHeight; if (Math.abs(h - lastH) < 2) return; lastH = h; clearTimeout(rz); rz = window.setTimeout(() => ScrollTrigger.refresh(), 180); });
+    ro.observe(document.body);
     return () => {
+      ro.disconnect(); clearTimeout(rz);
       document.removeEventListener("click", onClick);
       ctx?.revert(); splits.forEach((s) => s.revert());
       if (lenis) { gsap.ticker.remove(tick); lenis.destroy(); }
