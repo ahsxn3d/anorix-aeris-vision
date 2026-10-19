@@ -71,7 +71,7 @@ export function Cockpit() {
   );
 }
 
-const shots = [["c1_e7e6e2_c9ccd1", "Profile", "A single stroke from nose to tail"], ["top_e7e6e2_c9ccd1", "Plan", "The glasshouse pulled rearwards"], ["c2_0a0b0d_c9ccd1", "Blade", "1,600 pixels of light"], ["c3_0a0b0d_1b1d22", "Obsidian", "Stance, from behind"]];
+const shots = [["g-lamp", "Blade", "The lamp cut into the nose, lit"], ["g-wheel", "Corner", "21-inch rim, carbon-ceramic brake"], ["g-cabin", "Cabin", "Two seats under one glass canopy"], ["g-rear", "Obsidian", "Full-width rear light, from behind"]];
 export function Gallery() {
   return (
     <section className="bg-void py-[clamp(96px,11vw,170px)]">
@@ -80,7 +80,7 @@ export function Gallery() {
         <div className="mt-14 grid gap-5 md:grid-cols-2">
           {shots.map(([img, t, d], i) => (
             <figure key={img} className={`hov-wrap ${i % 2 ? "md:mt-24" : ""}`}>
-              <div data-clip className="relative aspect-[16/10] overflow-hidden rounded-[20px]"><div data-clip-img className="absolute inset-0"><div className="hov absolute inset-0"><Image src={`/img/${img}.webp`} alt={`Aeris Vision One, ${t.toLowerCase()} view`} fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover" /></div></div></div>
+              <div data-clip className="relative aspect-[16/10] overflow-hidden rounded-[20px]"><div data-clip-img className="absolute inset-0"><div className="hov absolute inset-0"><Image src={`/img/${img}.webp`} alt={`Aeris Vision One: ${d.toLowerCase()}`} fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover" /></div></div></div>
               <figcaption className="mt-4 flex items-baseline justify-between"><span className="display text-[26px]">{t}</span><span className="text-[14px] text-mist/50">{d}</span></figcaption>
             </figure>
           ))}
