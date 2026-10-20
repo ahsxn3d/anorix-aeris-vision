@@ -16,7 +16,7 @@ function webglOK() {
 /** Static poster is ALWAYS painted first; the canvas fades in over it once its first frame has rendered.
  *  If WebGL is missing / context lost / chunk fails, the poster simply stays. */
 export default function Lazy3D({ poster, posterSm, alt = "", render, className = "", priority = false, eager = false }: {
-  poster: string; posterSm?: string; alt?: string; className?: string; priority?: boolean; eager?: boolean;
+  poster?: string; posterSm?: string; alt?: string; className?: string; priority?: boolean; eager?: boolean;
   render: (p: { onReady: () => void; running: boolean }) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,6 +31,7 @@ export default function Lazy3D({ poster, posterSm, alt = "", render, className =
     // first interaction, so it never competes with first load / LCP.
     let near = false, woke = false;
     const evs = ["pointermove", "pointerdown", "wheel", "touchstart", "keydown", "scroll"] as const;
+    if (!poster) setTimeout(() => wake(), 700);
     const wake = () => { woke = true; evs.forEach((e) => window.removeEventListener(e, wake)); if (near) setMount(true); };
     evs.forEach((e) => window.addEventListener(e, wake, { passive: true }));
     const io = new IntersectionObserver(([e]) => { near = e.isIntersecting; if (near && woke) setMount(true); }, { rootMargin: eager ? "200% 0px" : "150% 0px" });
@@ -39,7 +40,7 @@ export default function Lazy3D({ poster, posterSm, alt = "", render, className =
     const vis = new IntersectionObserver(([e]) => setRunning(e.isIntersecting), { rootMargin: "5% 0px" });
     vis.observe(el);
     return () => { io.disconnect(); vis.disconnect(); evs.forEach((e) => window.removeEventListener(e, wake)); };
-  }, [eager]);
+  }, [eager, poster]);
   useEffect(() => {
     if (!mount) return;
     const c = ref.current?.querySelector("canvas");
@@ -50,7 +51,7 @@ export default function Lazy3D({ poster, posterSm, alt = "", render, className =
   }, [mount, ready]);
   return (
     <div ref={ref} className={`absolute inset-0 ${className}`}>
-      <Image src={poster} alt={alt} fill priority={priority} sizes="100vw" className={`object-cover transition-opacity duration-700 ${posterSm ? "max-md:hidden" : ""} ${ready && !dead ? "opacity-0" : "opacity-100"}`} />
+      {poster && <Image src={poster} alt={alt} fill priority={priority} sizes="100vw" className={`object-cover transition-opacity duration-700 ${posterSm ? "max-md:hidden" : ""} ${ready && !dead ? "opacity-0" : "opacity-100"}`} />}
       {posterSm && <Image src={posterSm} alt={alt} fill priority={priority} sizes="100vw" className={`object-cover transition-opacity duration-700 md:hidden ${ready && !dead ? "opacity-0" : "opacity-100"}`} />}
       {mount && !dead && (
         <div className={`absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-100" : "opacity-0"}`}>

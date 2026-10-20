@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import Live from "./Live";
 import { useEffect, useRef, useState } from "react";
 import { Arrow, Marquee } from "./kit/ui";
 
@@ -71,20 +71,18 @@ export function Cockpit() {
   );
 }
 
-const shots = [["g-lamp", "Blade", "The lamp cut into the nose, lit"], ["g-wheel", "Corner", "21-inch rim, carbon-ceramic brake"], ["g-cabin", "Cabin", "Two seats under one glass canopy"], ["g-rear", "Obsidian", "Full-width rear light, from behind"]];
+const shots = [["lamp", "Blade", "The lamp cut into the nose, lit"], ["wheel", "Corner", "21-inch rim, carbon-ceramic brake"], ["cabin", "Cabin", "Two seats under one glass canopy"], ["rear", "Tail", "Full-width rear light, from behind"]] as const;
 export function Gallery() {
+  const [k, setK] = useState(0), [hold, setHold] = useState(false);
+  useEffect(() => { if (hold) return; const t = setInterval(() => setK((x) => (x + 1) % shots.length), 4200); return () => clearInterval(t); }, [hold]);
   return (
     <section className="bg-void py-[clamp(96px,11vw,170px)]">
       <div className="wrap">
-        <div className="flex items-end justify-between gap-6"><h2 className="display text-[clamp(44px,5vw,84px)]" data-reveal="lines">Every angle.</h2><p className="label hidden text-mist/50 md:block">Studio, Turin · 2026</p></div>
-        <div className="mt-14 grid gap-5 md:grid-cols-2">
-          {shots.map(([img, t, d], i) => (
-            <figure key={img} className={`hov-wrap ${i % 2 ? "md:mt-24" : ""}`}>
-              <div data-clip className="relative aspect-[16/10] overflow-hidden rounded-[20px]"><div data-clip-img className="absolute inset-0"><div className="hov absolute inset-0"><Image src={`/img/${img}.webp`} alt={`Aeris Vision One: ${d.toLowerCase()}`} fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover" /></div></div></div>
-              <figcaption className="mt-4 flex items-baseline justify-between"><span className="display text-[26px]">{t}</span><span className="text-[14px] text-mist/50">{d}</span></figcaption>
-            </figure>
-          ))}
-        </div>
+        <div className="flex items-end justify-between gap-6"><h2 className="display text-[clamp(44px,5vw,84px)]" data-reveal="lines">Every angle.</h2><p className="label hidden text-mist/50 md:block">Live 3D · one car, four stations</p></div>
+        <div data-fade className="relative mt-14 aspect-[4/5] overflow-hidden rounded-[24px] ring-1 ring-mist/10 sm:aspect-[16/9]"><Live view={shots[k][0]} paint={k === 3 ? "obsidian" : "silver"} rim={1} bg="#0d0e11" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-void/80 to-transparent" />
+          <p className="absolute bottom-6 left-6 max-w-[30ch] text-[15px] text-mist/80 md:bottom-8 md:left-8">{shots[k][2]}</p></div>
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" role="tablist" aria-label="Camera station">{shots.map(([v, t], i) => <button key={v} role="tab" aria-selected={k === i} onClick={() => { setK(i); setHold(true); }} className={`flex items-baseline justify-between rounded-[14px] border px-5 py-4 text-left transition-colors ${k === i ? "border-ice text-mist" : "border-mist/10 text-mist/55 hover:border-mist/40"}`}><span className="display text-[22px]">{t}</span><span className="label text-mist/40">0{i + 1}</span></button>)}</div>
       </div>
     </section>
   );

@@ -1,8 +1,9 @@
 "use client";
-import Image from "next/image";
+import dynamic from "next/dynamic";
+import Lazy3D from "./kit/Lazy3D";
 import { useEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Sequence from "./Sequence";
+const CarView = dynamic(() => import("./CarView"), { ssr: false });
 import { Arrow } from "./kit/ui";
 
 // Chapters follow the camera's orbit: 3/4 front -> nose -> profile -> rear 3/4 (frames 0, 24, 48, 72)
@@ -13,19 +14,18 @@ const ch = [
   { k: "03 · Stance", h: ["Wide, low,", "planted."], p: "Wheels pushed to the corners on 21-inch rims, a full-width rear light and a body only 1.15 metres from the road. It looks fast standing still." },
 ];
 export default function Stage() {
-  const root = useRef<HTMLElement>(null), progress = useRef(0), frame = useRef(0);
+  const root = useRef<HTMLElement>(null), progress = useRef(0), yaw = useRef(0);
   const [c, setC] = useState(0);
   useEffect(() => {
-    const st = ScrollTrigger.create({ trigger: root.current, start: "top top", end: "bottom bottom", onUpdate: (s) => { const x = Math.min(3.999, s.progress * 4), seg = Math.floor(x), fr = x - seg, mv = Math.min(1, Math.max(0, (fr - 0.62) / 0.38)); progress.current = Math.min(3, seg + mv * mv * (3 - 2 * mv)) / 3; frame.current = progress.current * 72; const v = Math.min(3, Math.floor(s.progress * 3.999)); setC((p) => (p === v ? p : v)); } });
+    const st = ScrollTrigger.create({ trigger: root.current, start: "top top", end: "bottom bottom", onUpdate: (s) => { const x = Math.min(3.999, s.progress * 4), seg = Math.floor(x), fr = x - seg, mv = Math.min(1, Math.max(0, (fr - 0.62) / 0.38)); progress.current = Math.min(3, seg + mv * mv * (3 - 2 * mv)) / 3; const q = progress.current * 3, K = [0, -40, -130, -182], i0 = Math.min(2, Math.floor(q)); yaw.current = K[i0] + (K[i0 + 1] - K[i0]) * (q - i0); const v = Math.min(3, Math.floor(s.progress * 3.999)); setC((p) => (p === v ? p : v)); } });
     return () => st.kill();
   }, []);
   return (
     <section ref={root} className="relative h-[400vh] bg-void" aria-label="Aeris Vision One">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* first paint: frame 0 as a priority image; the sequence canvas covers it once frames are decoded */}
-        <Image src="/seq/d/0.webp" alt="Aeris Vision One concept car in Lunar Silver, three-quarter front view" fill priority sizes="100vw" className="object-cover max-md:hidden" />
-        <Image src="/seq/m/0.webp" alt="Aeris Vision One concept car in Lunar Silver, three-quarter front view" fill priority sizes="100vw" className="object-cover md:hidden" />
-        <Sequence frame={frame} count={73} dir="/seq/d" mdir="/seq/m" />
+        {/* live studio car: the camera orbits with scroll (3/4 front → nose → profile → rear 3/4) */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_55%,#1b1d22,#0a0b0d_70%)]" />
+        <Lazy3D eager render={({ onReady, running }) => <CarView paint="silver" rim={1} yaw={yaw} running={running} onReady={onReady} bg="#0a0b0d" />} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-void via-void/10 to-void/40 md:bg-gradient-to-r md:from-void/85 md:via-void/0 md:to-transparent" />
         <div className="wrap relative flex h-full flex-col justify-end pb-[12vh] md:justify-center md:pb-0">
           <div className="relative min-h-[320px] md:min-h-[440px]">
@@ -36,7 +36,7 @@ export default function Stage() {
                   ? <h1 className="display mt-6 text-[clamp(52px,7.4vw,124px)]">{x.h.map((l, j) => <span key={l} className="kit-mask"><span className="kit-line" style={{ animationDelay: `${0.15 + j * 0.12}s` }}>{l}</span></span>)}</h1>
                   : <h2 className="display mt-6 text-[clamp(48px,6.6vw,112px)]">{x.h.map((l) => <span key={l} className="block">{l}</span>)}</h2>}
                 <p className={`mt-7 max-w-[42ch] text-[15px] leading-[1.7] text-mist/70 ${i === 0 ? "kit-soft" : ""}`}>{x.p}</p>
-                {i === 0 && <div className="kit-soft pointer-events-auto mt-9 flex flex-wrap gap-3"><a href="#reserve" className="btn bg-mist text-void hover:bg-ice">Reserve a viewing <Arrow /></a><a href="#configure" className="btn border border-mist/25 hover:border-ice hover:text-ice">Configure</a></div>}
+                {i === 0 && <div className="kit-soft pointer-events-auto mt-9 flex flex-wrap gap-3"><a href="/reserve" className="btn bg-mist text-void hover:bg-ice">Reserve a viewing <Arrow /></a><a href="/configure" className="btn border border-mist/25 hover:border-ice hover:text-ice">Configure</a></div>}
               </div>
             ))}
           </div>
