@@ -9,7 +9,7 @@ import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLigh
 export const PAINTS: Record<string, [number, number, number]> = { silver: [0xb9bdc3, 1, 0.3], obsidian: [0x0d0e11, 0.6, 0.3], ember: [0x7a1f16, 0.9, 0.3], glacier: [0x9fb6c6, 0.85, 0.32] };
 type V3 = [number, number, number];
 export type View = { deg: number; el: number; d: number; t: V3; fov: number; shift?: number };
-const DESK: View = { deg: 40, el: 7, d: 7.6, t: [0, 0.55, 0.24], fov: 30, shift: -1.4 }, MOBILE: View = { deg: 40, el: 9, d: 10, t: [0, 0.55, 0.24], fov: 36 };
+const DESK: View = { deg: 40, el: 7, d: 7.6, t: [0, 0.55, 0.24], fov: 30, shift: -1.4 }, MOBILE: View = { deg: 40, el: 9, d: 10.5, t: [0, -0.9, 0.24], fov: 36 };
 /** Named camera stations around the car (model faces +z, wheels at z ±1.49). */
 export const VIEWS: Record<string, View> = {
   hero: DESK, center: { deg: 40, el: 8, d: 8.4, t: [0, 0.55, 0.1], fov: 30 },
@@ -78,7 +78,7 @@ function Car({ paint, rim, yaw, mobile, onReady, bg, running, view: v }: { paint
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera; const c = { ...view.current, t: [...view.current.t] as V3, yaw: yaw.current };
     let raf = 0;
-    const place = () => { const r = THREE.MathUtils.degToRad(c.deg + c.yaw), side = v ? 0 : Math.abs(Math.sin(r)) * 0.5, dd = c.d * (1 + side) * Math.max(1, (v ? 1.15 : 1.2) / asp.current), e = THREE.MathUtils.degToRad(c.el), T = new THREE.Vector3(...c.t);
+    const place = () => { const r = THREE.MathUtils.degToRad(c.deg + c.yaw), side = v ? 0 : Math.abs(Math.sin(r)) * 0.5, dd = c.d * (1 + side) * (v ? Math.max(1, 1.15 / asp.current) : mobile ? 1 : Math.max(1, 1.2 / asp.current)), e = THREE.MathUtils.degToRad(c.el), T = new THREE.Vector3(...c.t);
       cam.fov = c.fov; cam.updateProjectionMatrix(); cam.position.set(T.x + Math.sin(r) * Math.cos(e) * dd, T.y + Math.sin(e) * dd, T.z + Math.cos(r) * Math.cos(e) * dd); cam.lookAt(T); if (c.shift) cam.translateX(c.shift); invalidate(); };
     const loop = () => { const g = view.current, k = 0.08; let m = 0;
       const ease = (a: number, b: number) => { const d = b - a; m = Math.max(m, Math.abs(d)); return a + d * k; };
